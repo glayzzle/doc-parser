@@ -3,11 +3,9 @@
   "version": "0.1.0",
   "description": "Parses docblocks comments",
   "main": "src/index.js",
-  "directories": {
-    "test": "test"
-  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node node_modules/mocha/bin/mocha test --stack-size=5000",
+    "cover": "node --stack-size=5000 node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha"
   },
   "repository": {
     "type": "git",
@@ -25,6 +23,10 @@
   "homepage": "https://github.com/glayzzle/docblock-parser#readme",
   "devDependencies": {
     "coveralls": "^2.11.15",
+    "grunt": "^1.0.1",
+    "grunt-browserify": "^5.0.0",
+    "grunt-contrib-uglify": "^2.0.0",
+    "grunt-documentation": "^1.2.1",
     "istanbul": "^0.4.5",
     "mocha": "^3.2.0",
     "should": "^11.1.2"
