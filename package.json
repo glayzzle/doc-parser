@@ -1,6 +1,6 @@
 {
   "name": "docblock-parser",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Parses docblocks comments",
   "main": "src/index.js",
   "scripts": {
