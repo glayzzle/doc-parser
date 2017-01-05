@@ -1,3 +1,11 @@
+## [Version 0.2.2](https://github.com/glayzzle/docblock-parser/releases/tag/v0.2.2) (2017-1-5)
+
+### Patches
+
+- add some XO awesomeness: [`6efa589`](https://github.com/glayzzle/docblock-parser/commit/6efa589)
+
+[...full changes](https://github.com/glayzzle/docblock-parser/compare/v0.2.1...v0.2.2)
+
 ## [Version 0.2.1](https://github.com/glayzzle/docblock-parser/releases/tag/v0.2.1) (2017-1-5)
 
 ### Patches
