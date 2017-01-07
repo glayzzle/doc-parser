@@ -17,7 +17,7 @@ var Lexer = function (tokens) {
 
 // breaking symbols
 var lexerSymbols = [
-  ',', '=', ':', '(', ')', '[', ']', '{', '}', '@'
+  ',', '=', ':', '(', ')', '[', ']', '{', '}', '@', '"', '\''
 ];
 
 // whitespace chars
@@ -28,6 +28,7 @@ var lexerWhiteSpace = [' ', '\t', '\r', '\n'];
  */
 Lexer.prototype.read = function (input) {
   this._input = input;
+  this.line = 0;
   this.offset = 0;
   this.text = '';
   this.token = null;
@@ -41,6 +42,15 @@ Lexer.prototype.input = function () {
   if (this.offset < this._input.length) {
     this.ch = this._input[this.offset++];
     this.text += this.ch;
+    if (this.ch === '\r') {
+      if (this._input[this.offset] === '\n') {
+        // windows line
+        this.text += this._input[this.offset++];
+      }
+      this.line ++;
+    } else if (this.ch === '\n') {
+      this.line ++;
+    }
     return this.ch;
   }
   return null;
@@ -53,28 +63,54 @@ Lexer.prototype.input = function () {
 Lexer.prototype.unput = function () {
   this.offset--;
   this.text = this.text.substring(0, this.text.length - 1);
+  this.ch = this._input[this.offset - 1];
+  var after = this._input[this.offset];
+  if (after === '\n' || after === '\r') {
+    if (after === '\n' && this.ch === '\r') {
+      this.offset --;
+      this.ch = this._input[this.offset - 1];
+      this.text = this.text.substring(0, this.text.length - 1);
+    }
+    this.line --;
+  }
 };
 
 /**
  * Revert back the current consumed token
  * @return {String|Number} the previous token
  */
-Lexer.prototype.unlex = function () {
-  this.offset = this.__offset;
-  this.text = this.__text;
-  this.token = this.__token;
+Lexer.prototype.unlex = function (state) {
+  if (!state) {
+    state = this.backup;
+  }
+  if (state) {
+    this.offset = state.offset;
+    this.text = state.text;
+    this.token = state.token;
+    this.line = state.line;
+  }
   return this.token;
 };
 
+/**
+ * Revert back the current consumed token
+ * @return {String|Number} the previous token
+ */
+Lexer.prototype.state = function () {
+  return {
+    offset: this.offset,
+    text: this.text,
+    token: this.token,
+    line: this.line
+  };
+};
 /**
  * Consumes the next token (ignores whitespaces)
  * @return {String|Number} the current token
  */
 Lexer.prototype.lex = function () {
   // backup
-  this.__offset = this.offset;
-  this.__text = this.text;
-  this.__token = this.token;
+  this.backup = this.state();
   // scan
   this.token = this.next();
   while (this.token === this._t.T_WHITESPACE) {
@@ -119,19 +155,12 @@ Lexer.prototype.next = function () {
     }
     return this._t.T_WHITESPACE;
   }
-  ch = ch.charCodeAt(0);
-  if (ch > 47 && ch < 58) {
-    while (ch > 47 && ch < 58 && ch !== null) {
-      ch = this.input();
-      if (ch !== null) {
-        ch = ch.charCodeAt(0);
-      }
-    }
-    if (ch !== null) {
-      this.unput();
-    }
-    return this._t.T_NUM;
+  // try to parse a number
+  var isNumber = this.readNumber();
+  if (isNumber) {
+    return isNumber;
   }
+  // try to parse classic text
   do {
     ch = this.input();
     if (
@@ -143,6 +172,31 @@ Lexer.prototype.next = function () {
     }
   } while (this.offset < this._input.length);
   return this._t.T_STRING;
+};
+
+Lexer.prototype.readNumber = function () {
+  var ch = this.ch.charCodeAt(0);
+  if (ch === 46 || (ch > 47 && ch < 58)) {
+    var isFloat = (ch === 46);
+    while (ch === 46 || (ch > 47 && ch < 58)) {
+      ch = this.input();
+      if (ch !== null) {
+        ch = ch.charCodeAt(0);
+      }
+      if (ch === 46) {
+        if (isFloat) {
+          break;
+        } else {
+          isFloat = true;
+        }
+      }
+    }
+    if (ch !== null) {
+      this.unput();
+    }
+    return this._t.T_NUM;
+  }
+  return null;
 };
 
 // exports
