@@ -12,14 +12,14 @@ annotations under an structured syntax tree.
 # Install
 
 ```sh
-npm install parsedoc --save
+npm install doc-parser --save
 ```
 
 And simple usage :
 
 ```js
-var ParseDoc = require('parsedoc');
-var reader = new ParseDoc();
+var DocParser = require('doc-parser');
+var reader = new DocParser();
 var data = reader.parse('/** @hello world */');
 ```
 
@@ -59,7 +59,17 @@ var data = reader.parse('/** @hello world */');
 # AST structure
 
 ```js
-
+{
+  kind: 'doc',
+  summary: 'Some description retrieved from the first line of the coment',
+  body: [
+    {
+      kind: 'return',
+      type: 'void',
+      description: 'Some extra informations'
+    }
+  ]
+}
 ```
 
 # Misc

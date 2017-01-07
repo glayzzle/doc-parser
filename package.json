@@ -1,5 +1,5 @@
 {
-  "name": "parsedoc",
+  "name": "doc-parser",
   "version": "0.2.2",
   "description": "Parses docblocks comments",
   "main": "src/index.js",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/glayzzle/docblock-parser.git"
+    "url": "git+https://github.com/glayzzle/doc-parser.git"
   },
   "xo": {
     "space": 2,
@@ -31,9 +31,9 @@
   "author": "Ioan CHIRIAC",
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/glayzzle/docblock-parser/issues"
+    "url": "https://github.com/glayzzle/doc-parser/issues"
   },
-  "homepage": "https://github.com/glayzzle/docblock-parser#readme",
+  "homepage": "https://github.com/glayzzle/doc-parser#readme",
   "devDependencies": {
     "coveralls": "^2.11.15",
     "grunt": "^1.0.1",

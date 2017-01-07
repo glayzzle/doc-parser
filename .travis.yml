@@ -14,4 +14,4 @@ notifications:
     on_failure: always
     on_start: never
 script: npm run cover
-after_success: cat /home/travis/build/glayzzle/docblock-parser/coverage/lcov.info | /home/travis/build/glayzzle/docblock-parser/node_modules/coveralls/bin/coveralls.js
+after_success: cat /home/travis/build/glayzzle/doc-parser/coverage/lcov.info | /home/travis/build/glayzzle/doc-parser/node_modules/coveralls/bin/coveralls.js
