@@ -34,6 +34,21 @@ var docSplit = /^(\s*\*[ \t]*|[ \t]*)(.*)$/gm;
  */
 var Parser = function (lexer, grammar) {
   this.lexer = lexer;
+  // list of parsers
+  this.parsers = {
+    type: this.parseType,
+    variable: this.parseVarName,
+    name: this.parseVarName, // alias of variable
+    text: this.parseText,
+    version: this.parseVersion,
+    array: this.parseArray,
+    object: this.parseObject,
+    boolean: this.parseBoolean,
+    number: this.parseNumber,
+    string: this.parseString
+  };
+  // list of annotation specific nodes
+  // most interesting ones only
   this.grammar = {
     param: [{
       property: 'type',
@@ -85,6 +100,7 @@ var Parser = function (lexer, grammar) {
     }]
   };
 
+  // optionnal grammar
   if (grammar) {
     this.extendGrammar(grammar);
   }
@@ -105,7 +121,7 @@ Parser.prototype.parse = function (input) {
   var ast = {
     kind: 'doc',
     summary: '',
-    blocks: []
+    body: []
   };
 
   // array of lines (output from php-parser)
@@ -159,7 +175,7 @@ Parser.prototype.parse = function (input) {
   while (this.token !== this.lexer._t.T_EOF) {
     var node = this.parseTopStatement();
     if (node) {
-      ast.blocks.push(node);
+      ast.body.push(node);
     }
     this.token = this.lexer.lex();
   }
@@ -176,7 +192,7 @@ Parser.prototype.parseTopStatement = function () {
       value: this.lexer.text
     };
   } else if (this.token === this.lexer._t.T_NUM) {
-    // a number
+    // number
     return {
       kind: 'number',
       value: this.lexer.text
@@ -206,27 +222,86 @@ Parser.prototype.parseTopStatement = function () {
 Parser.prototype.parseAnnotation = function () {
   var result;
   var item;
+  var type;
   this.token = this.lexer.lex();
   if (this.token === this.lexer._t.T_STRING) {
-    // inner annotation
-    result = ['annotation', this.lexer.text, []];
-    this.token = this.lexer.lex();
+    type = this.lexer.text.toLowerCase();
+    var line = this.lexer.line;
+    this.token = this.lexer.lex(); // eat
+
+    // grammar specific annotation
+    if (this.grammar[type]) {
+      result = this.parseGrammar(type);
+      if (result) {
+        return result;
+      }
+    }
+
     if (this.token === '(') {
-      // with args
+      // method annotation
       do {
+        result = {
+          kind: 'annotation',
+          type: type,
+          arguments: []
+        };
         this.token = this.lexer.lex();
         item = this.parseTopStatement();
         if (item !== null) {
-          result[2].push(item);
+          result.arguments.push(item);
         }
       } while (this.token !== ')' && this.token !== this.lexer._t.T_EOF);
     } else {
-      this.token = this.lexer.unlex();
+      // generic doc block
+      result = {
+        kind: 'block',
+        type: type,
+        options: []
+      };
+      while (line === this.lexer.line) {
+        item = this.parseTopStatement();
+        if (item !== null) {
+          result.options.push(item);
+        }
+        this.token = this.lexer.lex();
+      }
     }
     return result;
   }
   // ignore it
   this.token = this.lexer.unlex();
+  return null;
+};
+
+/**
+ * Parsing a rule
+ */
+Parser.prototype.parseGrammar = function (name) {
+  var result = {
+    kind: name
+  };
+  var rules = this.grammar[name];
+  for (var i = 0; i < rules.length; i++) {
+    var rule = rules[i];
+    result[rule.property] = this.parseRule(rule);
+  }
+  return result;
+};
+
+/**
+ * Parsing a rule
+ */
+Parser.prototype.parseRule = function (rule) {
+  if (typeof this.parsers[rule.parser] === 'function') {
+    var result = this.parsers[rule.parser].apply(this, []);
+    if (result === null) {
+      if (rule.default) {
+        return rule.default;
+      }
+    }
+    return result;
+  }
+  return null;
 };
 
 /**
@@ -307,12 +382,13 @@ Parser.prototype.readArray = function (endChar) {
       item = this.getJsonValue(item);
       if (this.token === '=>') {
         this.token = this.lexer.lex(); // eat
-        item = [
-          'key', item,
-          this.getJsonValue(
+        item = {
+          kind: 'key',
+          name: item,
+          value: this.getJsonValue(
             this.parseTopStatement()
           )
-        ];
+        };
         this.token = this.lexer.lex(); // eat
       }
       if (this.token !== ',') {
