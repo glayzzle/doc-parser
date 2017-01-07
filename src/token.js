@@ -4,7 +4,7 @@
  * @url http://glayzzle.com/docblock-parser
  */
 
-"use strict";
+'use strict';
 
 module.exports = {
   T_EOF: 1,

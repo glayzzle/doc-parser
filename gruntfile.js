@@ -1,5 +1,7 @@
-module.exports = function(grunt) {
-
+/**
+ * The automated build configuration
+ */
+module.exports = function (grunt) {
   // Project configuration.
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
@@ -19,11 +21,11 @@ module.exports = function(grunt) {
     documentation: {
       parser: {
         options: {
-          destination: "docs/",
-          format: "md",
-          version: "<%= pkg.version %>",
-          name: "<%= pkg.name %>",
-          filename: "parser.md",
+          destination: 'docs/',
+          format: 'md',
+          version: '<%= pkg.version %>',
+          name: '<%= pkg.name %>',
+          filename: 'parser.md',
           shallow: false
         },
         files: [{
@@ -32,11 +34,11 @@ module.exports = function(grunt) {
       },
       lexer: {
         options: {
-          destination: "docs/",
-          format: "md",
-          version: "<%= pkg.version %>",
-          name: "<%= pkg.name %>",
-          filename: "lexer.md",
+          destination: 'docs/',
+          format: 'md',
+          version: '<%= pkg.version %>',
+          name: '<%= pkg.name %>',
+          filename: 'lexer.md',
           shallow: false
         },
         files: [{
@@ -45,11 +47,11 @@ module.exports = function(grunt) {
       },
       main: {
         options: {
-          destination: "docs/",
-          format: "md",
-          version: "<%= pkg.version %>",
-          name: "<%= pkg.name %>",
-          filename: "README.md",
+          destination: 'docs/',
+          format: 'md',
+          version: '<%= pkg.version %>',
+          name: '<%= pkg.name %>',
+          filename: 'README.md',
           shallow: true
         },
         files: [{
@@ -60,6 +62,7 @@ module.exports = function(grunt) {
     uglify: {
       options: {
         compress: {
+          // eslint-disable-next-line camelcase
           keep_fnames: true
         },
         sourceMap: true,
@@ -81,5 +84,4 @@ module.exports = function(grunt) {
   // Default task(s).
   grunt.registerTask('default', ['browserify', 'uglify']);
   grunt.registerTask('doc', ['documentation']);
-
 };

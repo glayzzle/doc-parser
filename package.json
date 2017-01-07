@@ -11,6 +11,10 @@
     "type": "git",
     "url": "git+https://github.com/glayzzle/docblock-parser.git"
   },
+  "xo": {
+    "space": 2,
+    "envs": ["node", "mocha"]
+  },
   "keywords": [
     "doc",
     "parser",
