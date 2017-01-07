@@ -76,7 +76,6 @@ describe('Test lexer', function () {
     reader.unlex();
     reader.line.should.be.exactly(1);
     reader.text.should.be.exactly('hello');
-
   });
   describe('Test float', function () {
     reader.read('1.2.3');

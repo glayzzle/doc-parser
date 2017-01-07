@@ -38,4 +38,15 @@ describe('Test parser', function () {
     ast.body[0].options[1].kind.should.be.exactly('number');
     ast.body[0].options[1].value.should.be.exactly('1.23');
   });
+
+  it('test rule', function () {
+    var ast = doc.parse([
+      '/**',
+      ' * Description',
+      ' * @return void Some extra informations',
+      ' */'
+    ].join('\n'));
+    ast.body[0].kind.should.be.exactly('return');
+    console.log(ast.body[0]);
+  });
 });
