@@ -8,8 +8,10 @@ var should = require('should');
 var DocBlockParser = require('../src/index');
 
 describe('Test parser', function () {
+  var doc = new DocBlockParser();
+
   it('extend grammar', function () {
-    var doc = new DocBlockParser({
+    var doc2 = new DocBlockParser({
       foo: [],
       return: [
         null,
@@ -18,7 +20,22 @@ describe('Test parser', function () {
         }
       ]
     });
-    should.exist(doc.parser.grammar.foo);
-    doc.parser.grammar.return[1].property.should.be.exactly('bar');
+    should.exist(doc2.parser.grammar.foo);
+    doc2.parser.grammar.return[1].property.should.be.exactly('bar');
+  });
+
+  it('test number', function () {
+    var ast = doc.parse([
+      '/**',
+      ' * Description',
+      ' * @test 123 1.23',
+      ' */'
+    ].join('\n'));
+    ast.body[0].type.should.be.exactly('test');
+    ast.body[0].options.length.should.be.exactly(2);
+    ast.body[0].options[0].kind.should.be.exactly('number');
+    ast.body[0].options[0].value.should.be.exactly('123');
+    ast.body[0].options[1].kind.should.be.exactly('number');
+    ast.body[0].options[1].value.should.be.exactly('1.23');
   });
 });
