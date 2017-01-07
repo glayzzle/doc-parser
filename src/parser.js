@@ -132,7 +132,28 @@ Parser.prototype.parse = function (input) {
     }
     this.token = this.lexer.lex();
   }
-  ast.summary = input.substring(0, this.lexer.offset);
+
+  // extract summary from text
+  if (this.token === '@') {
+    ast.summary = input.substring(0, this.lexer.offset - 1);
+  } else {
+    ast.summary = input.substring(0, this.lexer.offset);
+  }
+
+  // trim first starting line returns
+  if (ast.summary[0] === '\r') {
+    ast.summary = ast.summary.substring(1);
+  }
+  if (ast.summary[0] === '\n') {
+    ast.summary = ast.summary.substring(1);
+  }
+  // trim last line returns
+  if (ast.summary[ast.summary.length - 1] === '\n') {
+    ast.summary = ast.summary.substring(0, ast.summary.length - 1);
+  }
+  if (ast.summary[ast.summary.length - 1] === '\r') {
+    ast.summary = ast.summary.substring(0, ast.summary.length - 1);
+  }
 
   // parsing blocks
   while (this.token !== this.lexer._t.T_EOF) {
