@@ -28,10 +28,11 @@ var lexerWhiteSpace = [' ', '\t', '\r', '\n'];
  */
 Lexer.prototype.read = function (input) {
   this._input = input;
-  this.line = 0;
+  this.line = 1;
   this.offset = 0;
   this.text = '';
   this.token = null;
+  this.backup = null;
 };
 
 /**
@@ -89,6 +90,7 @@ Lexer.prototype.unlex = function (state) {
     this.token = state.token;
     this.line = state.line;
   }
+  this.backup = null;
   return this.token;
 };
 
