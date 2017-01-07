@@ -8,7 +8,7 @@ var DocBlockParser = require('../src/index');
 describe('Test API', function () {
   var doc = new DocBlockParser();
   it('should parse something', function () {
-    var ast = doc.parse('Hello world');
+    var ast = doc.parse('/** Hello world */');
     console.log(ast);
   });
 });

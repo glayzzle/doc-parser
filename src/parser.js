@@ -5,6 +5,29 @@
  */
 'use strict';
 
+// Deep recursive merge
+var extend = function (a, b) {
+  if (a) {
+    if (Array.isArray(b)) {
+      for (var i = 0; i < b.length; i++) {
+        if (b[i]) {
+          a[i] = extend(a[i], b[i]);
+        }
+      }
+      return a;
+    } else if (typeof b === 'object') {
+      Object.getOwnPropertyNames(b).forEach(function (key) {
+        a[key] = extend(a[key], b[key]);
+      });
+      return a;
+    }
+  }
+  return b;
+};
+
+// Regex to split a documentation
+var docSplit = /^(\s*\*[ \t]*|[ \t]*)(.*)$/gm;
+
 /**
  * @constructor Parser
  * @property {Lexer} lexer
@@ -71,24 +94,7 @@ var Parser = function (lexer, grammar) {
  * extending the grammar
  */
 Parser.prototype.extendGrammar = function (grammar) {
-  for (var k in grammar) {
-    var e = grammar[k]; // node object
-    if (!this.grammar.hasOwnProperty(k)) {
-      this.grammar[k] = e;
-    } else {
-      for (var i = 0; i < e.length; i++) {
-        if (e[i]) { // array of properties
-          if (!this.grammar[k][i]) {
-            this.grammar[k][i] = e[i];
-          } else {
-            for (var j in e[i]) { // option of property
-              this.grammar[k][i][j] = e[i][j];
-            }
-          }
-        }
-      }
-    }
-  }
+  this.grammar = extend(this.grammar, grammar);
 };
 
 /**
@@ -101,119 +107,189 @@ Parser.prototype.parse = function (input) {
     summary: '',
     blocks: []
   };
+
+  // array of lines (output from php-parser)
+  if (Array.isArray(input)) {
+    input = input.join('\n');
+  } else {
+    // strip comments decoration
+    input = input.substring(2, input.length - 2).split(docSplit);
+    var lines = [];
+    for (var i = 2; i < input.length; i += 3) {
+      lines.push(input[i].trim());
+    }
+    input = lines.join('\n');
+  }
+
+  // initialize the lexer
   this.lexer.read(input);
   this.token = this.lexer.lex();
+
+  // reads the summary
   while (this.token !== this.lexer._t.T_EOF) {
-    var node = this.body();
+    if (this.token === '@') {
+      break;
+    }
+    this.token = this.lexer.lex();
+  }
+  ast.summary = input.substring(0, this.lexer.offset);
+
+  // parsing blocks
+  while (this.token !== this.lexer._t.T_EOF) {
+    var node = this.parseTopStatement();
     if (node) {
-      ast.push(node);
+      ast.blocks.push(node);
     }
     this.token = this.lexer.lex();
   }
   return ast;
 };
 
-Parser.prototype.body = function () {
-  var result;
-  var name;
-  var item;
+Parser.prototype.parseTopStatement = function () {
   if (this.token === this.lexer._t.T_STRING) {
-    if (this.lexer.text === 'true') {
-      return ['boolean', true];
-    } else if (this.lexer.text === 'false') {
-      return ['boolean', false];
-    } else if (this.lexer.text === 'null') {
-      return ['null'];
-    } else if (this.lexer.text === 'array') {
-      this.token = this.lexer.lex();
-      if (this.token === '(') {
-        result = ['array'];
-        result.push(this.read_array(')'));
-        return result;
-      }
-      this.token = this.lexer.unlex();
-      return ['type', this.lexer.text];
-    }
-    name = this.lexer.text;
-    this.token = this.lexer.lex();
-    if (this.token === '=' || this.token === '=>') {
-      // key value
-      this.token = this.lexer.lex();
-      return [
-        'key',
-        name,
-        this.get_json_value(this.body())
-      ];
-    } else if (this.token === '(') {
-      // method
-      result = ['method', name, []];
-      do {
-        this.token = this.lexer.lex();
-        item = this.body();
-        if (item !== null) {
-          result[2].push(item);
-        }
-      } while (this.token !== ')' && this.token !== this.lexer._t.T_EOF);
-      return result;
-    }
-    this.token = this.lexer.unlex();
-    return ['type', name];
+    return this.parseStatement();
   } else if (this.token === this.lexer._t.T_TEXT) {
-    return ['text', this.lexer.text];
+    // found a text
+    return {
+      kind: 'text',
+      value: this.lexer.text
+    };
   } else if (this.token === this.lexer._t.T_NUM) {
-    return ['number', this.lexer.text];
+    // a number
+    return {
+      kind: 'number',
+      value: this.lexer.text
+    };
   } else if (this.token === '[') {
     // can be an Array
-    result = ['array'];
-    result.push(this.read_array(']'));
-    return result;
+    return {
+      kind: 'array',
+      value: this.readArray(']')
+    };
   } else if (this.token === '{') {
     // can be a JSON
-    result = ['json'];
-    result.push(this.read_json());
-    return result;
+    return {
+      kind: 'object',
+      value: this.readJson()
+    };
   } else if (this.token === '@') {
-    this.token = this.lexer.lex();
-    if (this.token === this.lexer._t.T_STRING) {
-      // inner annotation
-      result = ['annotation', this.lexer.text, []];
-      this.token = this.lexer.lex();
-      if (this.token === '(') {
-        // with args
-        do {
-          this.token = this.lexer.lex();
-          item = this.body();
-          if (item !== null) {
-            result[2].push(item);
-          }
-        } while (this.token !== ')' && this.token !== this.lexer._t.T_EOF);
-      } else {
-        this.token = this.lexer.unlex();
-      }
-      return result;
-    }
-    // ignore it
-    this.token = this.lexer.unlex();
-    return null;
+    return this.parseAnnotation();
   }
   // ignore it
   return null;
 };
 
-Parser.prototype.read_array = function (endChar) {
+/**
+ * Parses a @annotation
+ */
+Parser.prototype.parseAnnotation = function () {
+  var result;
+  var item;
+  this.token = this.lexer.lex();
+  if (this.token === this.lexer._t.T_STRING) {
+    // inner annotation
+    result = ['annotation', this.lexer.text, []];
+    this.token = this.lexer.lex();
+    if (this.token === '(') {
+      // with args
+      do {
+        this.token = this.lexer.lex();
+        item = this.parseTopStatement();
+        if (item !== null) {
+          result[2].push(item);
+        }
+      } while (this.token !== ')' && this.token !== this.lexer._t.T_EOF);
+    } else {
+      this.token = this.lexer.unlex();
+    }
+    return result;
+  }
+  // ignore it
+  this.token = this.lexer.unlex();
+};
+
+/**
+ * Parses a T_STRING statement
+ */
+Parser.prototype.parseStatement = function () {
+  var word = this.lexer.text.toLowerCase();
+  if (word === 'true') {
+    return {
+      kind: 'boolean',
+      value: true
+    };
+  } else if (word === 'false') {
+    return {
+      kind: 'boolean',
+      value: false
+    };
+  } else if (word === 'null') {
+    return {
+      kind: 'null'
+    };
+  } else if (word === 'array') {
+    this.token = this.lexer.lex();
+    if (this.token === '(') {
+      return {
+        kind: 'array',
+        value: this.readArray(')')
+      };
+    }
+    this.token = this.lexer.unlex();
+    return {
+      kind: 'word',
+      value: this.lexer.text
+    };
+  }
+
+  // check other cases
+  var name = this.lexer.text;
+  this.token = this.lexer.lex();
+  if (this.token === '=' || this.token === '=>') {
+    // key value
+    this.token = this.lexer.lex();
+    return {
+      kind: 'key',
+      name: name,
+      value: this.getJsonValue(this.body())
+    };
+  } else if (this.token === '(') {
+    // method
+    var result = {
+      kind: 'method',
+      name: name,
+      arguments: []
+    };
+    do {
+      this.token = this.lexer.lex();
+      var item = this.parseTopStatement();
+      if (item !== null) {
+        result.arguments.push(item);
+      }
+    } while (this.token !== ')' && this.token !== this.lexer._t.T_EOF);
+    return result;
+  }
+  this.token = this.lexer.unlex();
+  return {
+    kind: 'word',
+    value: name
+  };
+};
+
+Parser.prototype.readArray = function (endChar) {
   var result = [];
   do {
     this.token = this.lexer.lex(); // consume start char
     var item = this.body();
     if (item !== null) { // ignore
       this.token = this.lexer.lex();
-      item = this.get_json_value(item);
+      item = this.getJsonValue(item);
       if (this.token === '=>') {
         this.token = this.lexer.lex(); // eat
         item = [
           'key', item,
-          this.get_json_value(
-            this.body()
+          this.getJsonValue(
+            this.parseTopStatement()
           )
         ];
         this.token = this.lexer.lex(); // eat
@@ -227,18 +303,20 @@ Parser.prototype.read_array = function (endChar) {
   return result;
 };
 
-Parser.prototype.read_json = function () {
+Parser.prototype.readJson = function () {
   var result = {};
   do {
     this.token = this.lexer.lex();
-    var item = this.body();
+    var item = this.parseTopStatement();
     if (item !== null) { // ignore
       this.token = this.lexer.lex(); // eat
       if (this.token === '=>') {
-        item = this.get_json_key(item);
+        item = this.getJsonKey(item);
         if (item !== null) {
           this.token = this.lexer.lex();
-          result[item] = this.get_json_value(this.body());
+          result[item] = this.getJsonValue(
+            this.parseTopStatement()
+          );
         }
         this.token = this.lexer.lex();
       }
@@ -251,19 +329,19 @@ Parser.prototype.read_json = function () {
   return result;
 };
 
-Parser.prototype.get_json_value = function (ast) {
+Parser.prototype.getJsonValue = function (ast) {
   if (!ast) {
     return null;
   }
 
-  var result = this.get_json_key(ast);
+  var result = this.getJsonKey(ast);
   if (result === null) {
-    if (ast[0] === 'json') {
-      result = ast[1];
-    } else if (ast[0] === 'array') {
+    if (ast.kind === 'object') {
+      result = ast.value;
+    } else if (ast.kind === 'array') {
       result = [];
-      ast[1].forEach(function (item) {
-        result.push(this.get_json_value(item));
+      ast.value.forEach(function (item) {
+        result.push(this.getJsonValue(item));
       }.bind(this));
     } else {
       result = ast;
@@ -273,18 +351,18 @@ Parser.prototype.get_json_value = function (ast) {
 };
 
 // converts an ast node to a scalar key
-Parser.prototype.get_json_key = function (ast) {
+Parser.prototype.getJsonKey = function (ast) {
   var result = null;
-  if (ast[0] === 'text') {
-    result = ast[1].substring(1, ast[1].length - 1);
+  if (ast.kind === 'text') {
+    result = ast.value.substring(1, ast.value.length - 1);
     try {
       result = JSON.parse('"' + result + '"');
     } catch (err) {
     }
-  } else if (ast[0] === 'number') {
+  } else if (ast.kind === 'number') {
     result = JSON.parse(ast[1]);
-  } else if (ast[0] === 'type' || ast[0] === 'boolean') {
-    result = ast[1];
+  } else if (ast.kind === 'word' || ast.kind === 'boolean') {
+    result = ast.value;
   }
   return result;
 };
