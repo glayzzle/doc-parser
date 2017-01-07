@@ -1,7 +1,7 @@
 # DocBlock & Annotations Parser
 
 [![npm version](https://badge.fury.io/js/doc-parser.svg)](https://www.npmjs.com/package/doc-parser)
-[![Build Status](https://travis-ci.org/glayzzle/doc-parser.svg?branch=master)](https://travis-ci.org/glayzzle/docblock-parser)
+[![Build Status](https://travis-ci.org/glayzzle/doc-parser.svg?branch=master)](https://travis-ci.org/glayzzle/doc-parser)
 [![Coverage Status](https://coveralls.io/repos/github/glayzzle/doc-parser/badge.svg?branch=master)](https://coveralls.io/github/glayzzle/doc-parser?branch=master)
 [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/sindresorhus/xo)
 [![Gitter](https://img.shields.io/badge/GITTER-join%20chat-green.svg)](https://gitter.im/glayzzle/Lobby)
