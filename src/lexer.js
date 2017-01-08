@@ -123,6 +123,7 @@ Lexer.prototype.lex = function () {
     // ignore white space
     this.token = this.next();
   }
+  // console.log(this.line, this.text);
   return this.token;
 };
 

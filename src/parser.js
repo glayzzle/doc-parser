@@ -183,25 +183,29 @@ Parser.prototype.parse = function (input) {
     if (node) {
       ast.body.push(node);
     }
-    this.token = this.lexer.lex();
   }
   return ast;
 };
 
 Parser.prototype.parseTopStatement = function () {
+  var value;
   if (this.token === this.lexer._t.T_STRING) {
     return this.parseStatement();
   } else if (this.token === this.lexer._t.T_TEXT) {
     // found a text
+    value = this.lexer.text;
+    this.token = this.lexer.lex();
     return {
       kind: 'text',
-      value: this.lexer.text
+      value: value
     };
   } else if (this.token === this.lexer._t.T_NUM) {
     // number
+    value = this.lexer.text;
+    this.token = this.lexer.lex();
     return {
       kind: 'number',
-      value: this.lexer.text
+      value: parseFloat(value)
     };
   } else if (this.token === '[') {
     // can be an Array
@@ -231,16 +235,18 @@ Parser.prototype.parseAnnotation = function () {
   var type;
   this.token = this.lexer.lex();
   if (this.token === this.lexer._t.T_STRING) {
+    var line = this.lexer.backup.line;
     type = this.lexer.text.toLowerCase();
-    var line = this.lexer.line;
-    this.token = this.lexer.lex(); // eat
+    this.token = this.lexer.lex(); // eat the tag name
 
     // grammar specific annotation
     if (this.grammar[type]) {
+      var backup = this.lexer.state();
       result = this.parseGrammar(type);
-      if (result) {
+      if (result !== null) {
         return result;
       }
+      this.token = this.lexer.unlex(backup);
     }
 
     if (this.token === '(') {
@@ -269,13 +275,10 @@ Parser.prototype.parseAnnotation = function () {
         if (item !== null) {
           result.options.push(item);
         }
-        this.token = this.lexer.lex();
       }
     }
     return result;
   }
-  // ignore it
-  this.token = this.lexer.unlex();
   return null;
 };
 
@@ -486,24 +489,63 @@ Parser.prototype.parseVersion = function () {
   return version;
 };
 
+/**
+ * Parses an array
+ */
 Parser.prototype.parseArray = function () {
-
+  if (this.token === '[') {
+    return this.readArray(']');
+  } else if (this.lexer.text.toLowerCase() === 'array') {
+    this.token = this.lexer.lex();
+    if (this.token === '(') {
+      return this.readArray(')');
+    }
+  }
+  return null;
 };
 
 Parser.prototype.parseObject = function () {
 
 };
 
+/**
+ * Parses a boolean value
+ */
 Parser.prototype.parseBoolean = function () {
-
+  if (this.token === this.lexer._t.T_STRING) {
+    var word = this.lexer.text.toLowerCase();
+    this.token = this.lexer.lex();
+    if (word === 'true') {
+      return true;
+    } else if (word === 'false') {
+      return false;
+    }
+  }
+  return null;
 };
 
+/**
+ * Parses a number
+ */
 Parser.prototype.parseNumber = function () {
-
+  if (this.token === this.lexer._t.T_NUM) {
+    var word = this.lexer.text;
+    this.token = this.lexer.lex();
+    return parseFloat(word);
+  }
+  return null;
 };
 
+/**
+ * Parses an email
+ */
 Parser.prototype.parseString = function () {
-
+  if (this.token === this.lexer._t.T_TEXT) {
+    var text = this.lexer.text.substring(1, this.lexer.text.length - 1);
+    this.token = this.lexer.lex();
+    return text;
+  }
+  return null;
 };
 
 /**
@@ -512,16 +554,19 @@ Parser.prototype.parseString = function () {
 Parser.prototype.parseStatement = function () {
   var word = this.lexer.text.toLowerCase();
   if (word === 'true') {
+    this.token = this.lexer.lex();
     return {
       kind: 'boolean',
       value: true
     };
   } else if (word === 'false') {
+    this.token = this.lexer.lex();
     return {
       kind: 'boolean',
       value: false
     };
   } else if (word === 'null') {
+    this.token = this.lexer.lex();
     return {
       kind: 'null'
     };
@@ -533,7 +578,6 @@ Parser.prototype.parseStatement = function () {
         value: this.readArray(')')
       };
     }
-    this.token = this.lexer.unlex();
     return {
       kind: 'word',
       value: this.lexer.text
@@ -567,7 +611,6 @@ Parser.prototype.parseStatement = function () {
     } while (this.token !== ')' && this.token !== this.lexer._t.T_EOF);
     return result;
   }
-  this.token = this.lexer.unlex();
   return {
     kind: 'word',
     value: name
@@ -580,7 +623,6 @@ Parser.prototype.readArray = function (endChar) {
     this.token = this.lexer.lex(); // consume start char
     var item = this.parseTopStatement();
     if (item !== null) { // ignore
-      this.token = this.lexer.lex();
       item = this.getJsonValue(item);
       if (this.token === '=>') {
         this.token = this.lexer.lex(); // eat
@@ -591,14 +633,16 @@ Parser.prototype.readArray = function (endChar) {
             this.parseTopStatement()
           )
         };
-        this.token = this.lexer.lex(); // eat
-      }
-      if (this.token !== ',') {
-        this.token = this.lexer.unlex();
       }
       result.push(item);
+      if (this.token !== ',') {
+        break;
+      }
     }
   } while (this.token !== endChar && this.token !== this.lexer._t.T_EOF);
+  if (this.token === endChar) {
+    this.token = this.lexer.lex();
+  }
   return result;
 };
 
@@ -608,7 +652,6 @@ Parser.prototype.readJson = function () {
     this.token = this.lexer.lex();
     var item = this.parseTopStatement();
     if (item !== null) { // ignore
-      this.token = this.lexer.lex(); // eat
       if (this.token === '=>') {
         item = this.getJsonKey(item);
         if (item !== null) {
@@ -617,14 +660,15 @@ Parser.prototype.readJson = function () {
             this.parseTopStatement()
           );
         }
-        this.token = this.lexer.lex();
       }
       if (this.token !== ',') {
-        this.token = this.lexer.unlex();
+        break;
       }
     }
   } while (this.token !== '}' && this.token !== this.lexer._t.T_EOF);
-  this.token = this.lexer.lex();
+  if (this.token === '}') {
+    this.token = this.lexer.lex();
+  }
   return result;
 };
 
