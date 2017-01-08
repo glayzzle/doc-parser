@@ -121,4 +121,17 @@ describe('Test parser', function () {
     should.equal(ast.body[0].name, null);
     ast.body[0].description.should.be.exactly('Foo is Bar');
   });
+
+  it('test deprecated', function () {
+    var ast = doc.parse([
+      '/**',
+      ' * @deprecated 13.223.314-beta.5',
+      ' */'
+    ].join('\n'));
+    ast.body[0].kind.should.be.exactly('deprecated');
+    ast.body[0].version.major.should.be.exactly(13);
+    ast.body[0].version.minor.should.be.exactly(223);
+    ast.body[0].version.patch.should.be.exactly(314);
+    ast.body[0].version.label.should.be.exactly('beta.5');
+  });
 });

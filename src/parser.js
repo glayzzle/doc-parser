@@ -475,12 +475,12 @@ Parser.prototype.parseVersion = function () {
   }
 
   // READ THE VERSION
-  v = v.split('\\.');
-  version.major = v[0];
+  v = v.split('.');
+  version.major = parseInt(v[0], 10);
   if (v.length > 1) {
-    version.minor = v[1];
+    version.minor = parseInt(v[1], 10);
     if (v.length > 2) {
-      version.patch = v[2];
+      version.patch = parseInt(v[2], 10);
     }
   }
   return version;
