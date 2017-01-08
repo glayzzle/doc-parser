@@ -84,13 +84,16 @@ Lexer.prototype.unlex = function (state) {
   if (!state) {
     state = this.backup;
   }
+  this.backup = null;
   if (state) {
     this.offset = state.offset;
     this.text = state.text;
     this.token = state.token;
     this.line = state.line;
+    if (state.backup) {
+      this.backup = state.backup;
+    }
   }
-  this.backup = null;
   return this.token;
 };
 
@@ -103,7 +106,8 @@ Lexer.prototype.state = function () {
     offset: this.offset,
     text: this.text,
     token: this.token,
-    line: this.line
+    line: this.line,
+    backup: this.backup
   };
 };
 /**

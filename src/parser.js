@@ -303,7 +303,6 @@ Parser.prototype.parseRule = function (rule) {
     var result = this.parsers[rule.parser].apply(this, []);
     if (result === null) {
       this.lexer.unlex(backup);
-      this.lexer.backup = backup;
       if (typeof rule.default !== 'undefined') {
         return rule.default;
       }

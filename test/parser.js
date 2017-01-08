@@ -108,4 +108,17 @@ describe('Test parser', function () {
     ast.body[0].name.should.be.exactly('var');
     ast.body[0].description.should.be.exactly('Foo is Bar');
   });
+
+  it('test param defaults', function () {
+    var ast = doc.parse([
+      '/**',
+      ' * Description',
+      ' * @param String Foo is Bar',
+      ' */'
+    ].join('\n'));
+    ast.body[0].kind.should.be.exactly('param');
+    ast.body[0].type.name.should.be.exactly('String');
+    should.equal(ast.body[0].name, null);
+    ast.body[0].description.should.be.exactly('Foo is Bar');
+  });
 });
