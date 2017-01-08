@@ -5,10 +5,19 @@
 **Parameters**
 
 -   `lexer`  
+-   `grammar`  
 
 **Properties**
 
--   `lexer` **[Lexer](#lexer)** 
+-   `lexer` **Lexer** 
+
+### extendGrammar
+
+extending the grammar
+
+**Parameters**
+
+-   `grammar`  
 
 ### parse
 
@@ -20,52 +29,69 @@ Parses the specified input
 
 Returns **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)** AST
 
-## Lexer
+### parseAnnotation
+
+Parses a @annotation
+
+### parseGrammar
+
+Parsing a rule
 
 **Parameters**
 
--   `tokens`  
+-   `name`  
 
-**Properties**
+### parseRule
 
--   `text` **[String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** Current parsed text (attached to current token)
--   `offset` **[Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** Current offset
--   `token` **([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) \| [Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number))** Current parsed token
-
-### read
-
-Initialize the lexer with specified text
+Parsing a rule
 
 **Parameters**
 
--   `input`  
+-   `rule`  
 
-### input
+### parseType
 
-Consumes a char
+Check if current token can be a type
 
-Returns **[String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+```ebnf
+type ::= '\\'? T_STRING ('\\' T_STRING) *
+parseType ::= type |
+   type '[' (type (',' type)*)? ']' |
+   type '<' (type (',' type)*)? '>'
+```
 
-### unput
+### parseVarName
 
-Revert back the current consumed char
+Reads a variable name
 
-Returns **void** 
+### parseText
 
-### unlex
+Parsing an entire line string
 
-Revert back the current consumed token
+### parseVersion
 
-Returns **([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) \| [Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number))** the previous token
+Reads a version informations
 
-### lex
+```ebnf
+parseVersion ::= T_NUM ('.' T_NUM ('.' T_NUM ('-' T_STRING)?)?)?
+```
 
-Consumes the next token (ignores whitespaces)
+### parseArray
 
-Returns **([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) \| [Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number))** the current token
+Parses an array
 
-### next
+### parseBoolean
 
-Eats a token (see lex for public usage) including whitespace
+Parses a boolean value
 
-Returns **([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) \| [Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number))** the current token
+### parseNumber
+
+Parses a number
+
+### parseString
+
+Parses an email
+
+### parseStatement
+
+Parses a T_STRING statement

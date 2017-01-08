@@ -36,6 +36,16 @@ Returns **void**
 
 Revert back the current consumed token
 
+**Parameters**
+
+-   `state`  
+
+Returns **([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) \| [Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number))** the previous token
+
+### state
+
+Revert back the current consumed token
+
 Returns **([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) \| [Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number))** the previous token
 
 ### lex
