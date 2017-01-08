@@ -17,7 +17,7 @@ var Lexer = function (tokens) {
 
 // breaking symbols
 var lexerSymbols = [
-  ',', '=', ':', '(', ')', '[', ']', '{', '}', '@', '"', '\'', '\\', '<', '>', '$', '-'
+  ',', '=', ':', '(', ')', '[', ']', '{', '}', '@', '"', '\'', '\\', '<', '>', '$', '-', '.'
 ];
 
 // whitespace chars
@@ -145,6 +145,12 @@ Lexer.prototype.next = function () {
     } while (ch !== tKey && this.offset < this._input.length);
     return this._t.T_TEXT;
   } else if (lexerSymbols.indexOf(ch) > -1) {
+    if (ch === '.') {
+      var nCh = this._input[this.offset].charCodeAt(0);
+      if (nCh > 47 && nCh < 58) {
+        return this.readNumber();
+      }
+    }
     if (ch === ':') {
       ch = '=>'; // alias
     } else if (ch === '=' && this._input[this.offset] === '>') {

@@ -11,7 +11,7 @@ var Lexer = require('../src/lexer');
 
 describe('Test lexer', function () {
   var reader = new Lexer(tokens);
-  describe('Test windows lines', function () {
+  it('Test windows lines', function () {
     reader.read([
       'hello',
       'world'
@@ -32,7 +32,7 @@ describe('Test lexer', function () {
     reader.text.should.be.exactly('world');
     reader.line.should.be.exactly(2);
   });
-  describe('Test mac lines', function () {
+  it('Test mac lines', function () {
     reader.read([
       'hello',
       'world'
@@ -46,7 +46,7 @@ describe('Test lexer', function () {
     reader.text.should.be.exactly('world');
     reader.line.should.be.exactly(2);
   });
-  describe('Test unlex', function () {
+  it('Test unlex', function () {
     reader.read([
       'hello',
       'world'
@@ -77,14 +77,14 @@ describe('Test lexer', function () {
     reader.line.should.be.exactly(1);
     reader.text.should.be.exactly('hello');
   });
-  describe('Test float', function () {
+  it('Test float', function () {
     reader.read('1.2.3');
     reader.lex().should.be.exactly(tokens.T_NUM);
     reader.text.should.be.exactly('1.2');
     reader.lex().should.be.exactly(tokens.T_NUM);
     reader.text.should.be.exactly('.3');
   });
-  describe('Test assign', function () {
+  it('Test assign', function () {
     reader.read('foo => a, bar: b');
     reader.lex().should.be.exactly(tokens.T_STRING);
     reader.lex().should.be.exactly('=>');
@@ -94,7 +94,7 @@ describe('Test lexer', function () {
     reader.lex().should.be.exactly('=>');
     reader.lex().should.be.exactly(tokens.T_STRING);
   });
-  describe('Test text', function () {
+  it('Test text', function () {
     reader.read('\'aze\\\'rty\'');
     reader.lex().should.be.exactly(tokens.T_TEXT);
     reader.text.should.be.exactly('\'aze\\\'rty\'');
