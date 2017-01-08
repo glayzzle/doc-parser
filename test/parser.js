@@ -28,18 +28,45 @@ describe('Test parser', function () {
     var ast = doc.parse([
       '/**',
       ' * Description',
-      ' * @test 123 1.23',
+      ' * @test 123 1.23 null',
       ' */'
-    ].join('\n'));
+    ].join('\r\n'));
     ast.body[0].type.should.be.exactly('test');
-    ast.body[0].options.length.should.be.exactly(2);
+    ast.body[0].options.length.should.be.exactly(3);
     ast.body[0].options[0].kind.should.be.exactly('number');
     ast.body[0].options[0].value.should.be.exactly('123');
     ast.body[0].options[1].kind.should.be.exactly('number');
     ast.body[0].options[1].value.should.be.exactly('1.23');
+    ast.body[0].options[2].kind.should.be.exactly('null');
   });
 
-  it('test rule', function () {
+  it('test array', function () {
+    var ast = doc.parse([
+      '/**',
+      ' * @test [1, 2, a => b]',
+      ' */'
+    ].join('\r\n'));
+    ast.body[0].type.should.be.exactly('test');
+    ast.body[0].options.length.should.be.exactly(1);
+    ast.body[0].options[0].kind.should.be.exactly('array');
+    console.log(ast.body[0].options[0]);
+  });
+
+  it('test boolean', function () {
+    var ast = doc.parse([
+      '/**',
+      ' * @test true false',
+      ' */'
+    ].join('\r\n'));
+    ast.body[0].type.should.be.exactly('test');
+    ast.body[0].options.length.should.be.exactly(2);
+    ast.body[0].options[0].kind.should.be.exactly('boolean');
+    ast.body[0].options[0].value.should.be.exactly(true);
+    ast.body[0].options[1].kind.should.be.exactly('boolean');
+    ast.body[0].options[1].value.should.be.exactly(false);
+  });
+
+  it('test return rule', function () {
     var ast = doc.parse([
       '/**',
       ' * Description',
@@ -47,6 +74,17 @@ describe('Test parser', function () {
       ' */'
     ].join('\n'));
     ast.body[0].kind.should.be.exactly('return');
-    console.log(ast.body[0]);
+    ast.body[0].what.kind.should.be.exactly('type');
+    ast.body[0].what.name.should.be.exactly('void');
+    ast.body[0].description.should.be.exactly('Some extra informations');
+  });
+  it('test return optional values', function () {
+    var ast = doc.parse('/* @return \\Foo\\Bar[] */');
+    ast.body[0].kind.should.be.exactly('return');
+    ast.body[0].what.kind.should.be.exactly('collection');
+    ast.body[0].what.value.kind.should.be.exactly('type');
+    ast.body[0].what.value.name.should.be.exactly('Foo\\Bar');
+    ast.body[0].what.value.fqn.should.be.exactly(true);
+    ast.body[0].description.should.be.exactly('');
   });
 });

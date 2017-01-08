@@ -64,7 +64,8 @@ var Parser = function (lexer, grammar) {
     {
       property: 'description',
       parser: 'text',
-      optional: true
+      optional: true,
+      default: ''
     }],
     return: [{
       property: 'what',
@@ -75,7 +76,8 @@ var Parser = function (lexer, grammar) {
     {
       property: 'description',
       parser: 'text',
-      optional: true
+      optional: true,
+      default: ''
     }],
     throws: [{
       property: 'what',
@@ -293,15 +295,200 @@ Parser.prototype.parseGrammar = function (name) {
  */
 Parser.prototype.parseRule = function (rule) {
   if (typeof this.parsers[rule.parser] === 'function') {
+    var backup = this.lexer.state();
     var result = this.parsers[rule.parser].apply(this, []);
     if (result === null) {
-      if (rule.default) {
+      this.lexer.unlex(backup);
+      if (typeof rule.default !== 'undefined') {
         return rule.default;
       }
     }
     return result;
   }
   return null;
+};
+
+/**
+ * Check if current token can be a type
+ * ```ebnf
+ * type ::= '\\'? T_STRING ('\\' T_STRING) *
+ * parseType ::= type |
+ *    type '[' (type (',' type)*)? ']' |
+ *    type '<' (type (',' type)*)? '>'
+ * ```
+ */
+Parser.prototype.parseType = function () {
+  var result = {
+    kind: 'type',
+    fqn: false,
+    name: ''
+  };
+  if (this.token === '\\') {
+    result.fqn = true;
+    this.token = this.lexer.lex();
+  }
+  if (this.token !== this.lexer._t.T_STRING) {
+    return null;
+  }
+  while (this.token === this.lexer._t.T_STRING) {
+    result.name += this.lexer.text;
+    this.token = this.lexer.lex(); // eat
+    if (this.token === '\\') {
+      result.name += '\\';
+      this.token = this.lexer.lex(); // eat && continue
+    } else if (this.token === '[') {
+      // collection
+      result = {
+        kind: 'collection',
+        value: result,
+        index: this.parseListOfTypes(']')
+      };
+      if (result.index === null) {
+        return null;
+      }
+      break;
+    } else if (this.token === '<') {
+      // template class
+      result = {
+        kind: 'class',
+        class: result,
+        parameters: this.parseListOfTypes('>')
+      };
+      if (result.parameters === null) {
+        return null;
+      }
+      break;
+    } else {
+      break;
+    }
+  }
+  return result;
+};
+
+/**
+ * Parse a list of type
+ * @private
+ */
+Parser.prototype.parseListOfTypes = function (charEnd) {
+  var result = [];
+  this.token = this.lexer.lex(); // eat && continue
+  if (this.token === charEnd) {
+    this.token = this.lexer.lex(); // eat && continue
+  } else {
+    var indexType = this.parseType();
+    if (indexType !== null) {
+      result.push(indexType);
+      while (this.token === ',') {
+        this.token = this.lexer.lex(); // eat && continue
+        indexType = this.parseType();
+        if (indexType === null) {
+          break;
+        } else {
+          result.push(indexType);
+        }
+      }
+    }
+    if (this.token !== charEnd) {
+      return null;
+    }
+  }
+  return result;
+};
+
+Parser.prototype.parseVarName = function () {
+
+};
+
+/**
+ * Parsing an entire line string
+ */
+Parser.prototype.parseText = function () {
+  if (this.token !== this.lexer._t.T_STRING) {
+    return null;
+  }
+  var line = this.lexer.backup.line;
+  var offset = this.lexer.backup.offset;
+  while (this.token !== this.lexer._t.EOF) {
+    this.token = this.lexer.lex(); // eat && continue
+    if (this.lexer.line !== line) {
+      this.lexer.unlex();
+      break;
+    }
+  }
+  var result = this.lexer._input.substring(offset, this.lexer.offset).trim();
+  this.token = this.lexer.lex(); // eat && continue
+  return result;
+};
+
+/**
+ * Reads a version informations
+ * ```ebnf
+ * parseVersion ::= T_NUM ('.' T_NUM ('.' T_NUM ('-' T_STRING)?)?)?
+ * ```
+ */
+Parser.prototype.parseVersion = function () {
+  var version = {
+    major: 0,
+    minor: 0,
+    patch: 0,
+    label: null
+  };
+
+  if (this.token !== this.lexer._t.T_NUM) {
+    return null;
+  }
+
+  // PARSE THE NUMERIC PART
+  var v = this.lexer.text;
+  this.token = this.lexer.lex(); // eat && continue
+  if (this.token === this.lexer._t.T_NUM) {
+    v += this.lexer.text;
+    this.token = this.lexer.lex(); // eat && continue
+  }
+
+  // EAT THE LABEL
+  if (this.token === '-') {
+    this.token = this.lexer.lex(); // eat && continue
+    if (this.token === this.lexer._t.T_STRING) {
+      version.label = this.lexer.text;
+      this.token = this.lexer.lex(); // eat && continue
+      if (this.token === this.lexer._t.T_NUM) {
+        version.label += this.lexer.text;
+        this.token = this.lexer.lex(); // eat && continue
+      }
+    }
+  }
+
+  // READ THE VERSION
+  v = v.split('\\.');
+  version.major = v[0];
+  if (v.length > 1) {
+    version.minor = v[1];
+    if (v.length > 2) {
+      version.patch = v[2];
+    }
+  }
+  return version;
+};
+
+Parser.prototype.parseArray = function () {
+
+};
+
+Parser.prototype.parseObject = function () {
+
+};
+
+Parser.prototype.parseBoolean = function () {
+
+};
+
+Parser.prototype.parseNumber = function () {
+
+};
+
+Parser.prototype.parseString = function () {
+
 };
 
 /**
@@ -347,7 +534,7 @@ Parser.prototype.parseStatement = function () {
     return {
       kind: 'key',
       name: name,
-      value: this.getJsonValue(this.body())
+      value: this.getJsonValue(this.parseTopStatement())
     };
   } else if (this.token === '(') {
     // method
@@ -376,7 +563,7 @@ Parser.prototype.readArray = function (endChar) {
   var result = [];
   do {
     this.token = this.lexer.lex(); // consume start char
-    var item = this.body();
+    var item = this.parseTopStatement();
     if (item !== null) { // ignore
       this.token = this.lexer.lex();
       item = this.getJsonValue(item);
@@ -457,7 +644,7 @@ Parser.prototype.getJsonKey = function (ast) {
     } catch (err) {
     }
   } else if (ast.kind === 'number') {
-    result = JSON.parse(ast[1]);
+    result = JSON.parse(ast.value);
   } else if (ast.kind === 'word' || ast.kind === 'boolean') {
     result = ast.value;
   }
