@@ -388,15 +388,13 @@ Parser.prototype.parseListOfTypes = function (charEnd) {
       while (this.token === ',') {
         this.token = this.lexer.lex(); // eat && continue
         indexType = this.parseType();
-        if (indexType === null) {
-          break;
-        } else {
+        if (indexType !== null) {
           result.push(indexType);
         }
       }
     }
-    if (this.token !== charEnd) {
-      return null;
+    if (this.token === charEnd) {
+      this.token = this.lexer.lex(); // eat && continue
     }
   }
   return result;

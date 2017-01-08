@@ -290,4 +290,34 @@ describe('Test parser', function () {
       'array'
     ]);
   });
+
+  it('test parseListOfTypes', function () {
+    var ast = doc.parse([
+      '/**',
+      ' * @return String[Number, Number]',
+      ' * @return Iterable<String, Foo>',
+      ' */'
+    ].join('\n'));
+    ast.body[0].kind.should.be.exactly('return');
+    ast.body[0].what.should.be.eql({
+      index: [
+        {
+          fqn: false,
+          kind: 'type',
+          name: 'Number'
+        },
+        {
+          fqn: false,
+          kind: 'type',
+          name: 'Number'
+        }
+      ],
+      kind: 'collection',
+      value: {
+        fqn: false,
+        kind: 'type',
+        name: 'String'
+      }
+    });
+  });
 });
