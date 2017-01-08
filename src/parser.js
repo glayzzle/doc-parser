@@ -38,7 +38,6 @@ var Parser = function (lexer, grammar) {
   this.parsers = {
     type: this.parseType,
     variable: this.parseVarName,
-    name: this.parseVarName, // alias of variable
     text: this.parseText,
     version: this.parseVersion,
     array: this.parseArray,
@@ -58,7 +57,7 @@ var Parser = function (lexer, grammar) {
     },
     {
       property: 'name',
-      parser: 'name',
+      parser: 'variable',
       optional: true
     },
     {
@@ -71,7 +70,7 @@ var Parser = function (lexer, grammar) {
       property: 'what',
       parser: 'type',
       optional: true,
-      default: 'void'
+      default: false
     },
     {
       property: 'description',
@@ -94,7 +93,12 @@ var Parser = function (lexer, grammar) {
       property: 'version',
       parser: 'version',
       optional: true,
-      default: 'latest'
+      default: {
+        major: 0,
+        minor: 0,
+        patch: 0,
+        label: null
+      }
     },
     {
       property: 'description',
@@ -299,6 +303,7 @@ Parser.prototype.parseRule = function (rule) {
     var result = this.parsers[rule.parser].apply(this, []);
     if (result === null) {
       this.lexer.unlex(backup);
+      this.lexer.backup = backup;
       if (typeof rule.default !== 'undefined') {
         return rule.default;
       }
@@ -395,8 +400,19 @@ Parser.prototype.parseListOfTypes = function (charEnd) {
   return result;
 };
 
+/**
+ * Reads a variable name
+ */
 Parser.prototype.parseVarName = function () {
-
+  if (this.token === '$') {
+    this.token = this.lexer.lex(); // eat && continue
+    if (this.token === this.lexer._t.T_STRING) {
+      var result = this.lexer.text;
+      this.token = this.lexer.lex(); // eat && continue
+      return result;
+    }
+  }
+  return null;
 };
 
 /**

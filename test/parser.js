@@ -78,6 +78,7 @@ describe('Test parser', function () {
     ast.body[0].what.name.should.be.exactly('void');
     ast.body[0].description.should.be.exactly('Some extra informations');
   });
+
   it('test return optional values', function () {
     var ast = doc.parse('/* @return \\Foo\\Bar[] */');
     ast.body[0].kind.should.be.exactly('return');
@@ -86,5 +87,25 @@ describe('Test parser', function () {
     ast.body[0].what.value.name.should.be.exactly('Foo\\Bar');
     ast.body[0].what.value.fqn.should.be.exactly(true);
     ast.body[0].description.should.be.exactly('');
+  });
+
+  it('test return defaults', function () {
+    var ast = doc.parse('/* @return */');
+    ast.body[0].kind.should.be.exactly('return');
+    ast.body[0].what.should.be.exactly(false);
+    ast.body[0].description.should.be.exactly('');
+  });
+
+  it('test param', function () {
+    var ast = doc.parse([
+      '/**',
+      ' * Description',
+      ' * @param String $var Foo is Bar',
+      ' */'
+    ].join('\n'));
+    ast.body[0].kind.should.be.exactly('param');
+    ast.body[0].type.name.should.be.exactly('String');
+    ast.body[0].name.should.be.exactly('var');
+    ast.body[0].description.should.be.exactly('Foo is Bar');
   });
 });

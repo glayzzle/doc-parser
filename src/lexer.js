@@ -17,7 +17,7 @@ var Lexer = function (tokens) {
 
 // breaking symbols
 var lexerSymbols = [
-  ',', '=', ':', '(', ')', '[', ']', '{', '}', '@', '"', '\'', '\\', '<', '>'
+  ',', '=', ':', '(', ')', '[', ']', '{', '}', '@', '"', '\'', '\\', '<', '>', '$'
 ];
 
 // whitespace chars
