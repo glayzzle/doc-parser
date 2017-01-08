@@ -586,7 +586,7 @@ Parser.prototype.parseStatement = function () {
     }
     return {
       kind: 'word',
-      value: this.lexer.text
+      value: this.lexer.backup.text
     };
   }
 
@@ -630,16 +630,6 @@ Parser.prototype.readArray = function (endChar) {
     var item = this.parseTopStatement();
     if (item !== null) { // ignore
       item = this.getJsonValue(item);
-      if (this.token === '=>') {
-        this.token = this.lexer.lex(); // eat
-        item = {
-          kind: 'key',
-          name: item,
-          value: this.getJsonValue(
-            this.parseTopStatement()
-          )
-        };
-      }
       result.push(item);
       if (this.token !== ',') {
         break;

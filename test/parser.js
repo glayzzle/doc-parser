@@ -261,4 +261,33 @@ describe('Test parser', function () {
     ast.body[2].kind.should.be.exactly('object');
     should.equal(ast.body[2].value, null);
   });
+
+  it('test getJsonValue', function () {
+    var ast = doc.parse([
+      '/**',
+      ' * @object { foo: { bar: false }, "key": [1, 2, 3] }',
+      ' */'
+    ].join('\n'));
+    ast.body[0].kind.should.be.exactly('object');
+    ast.body[0].value.should.be.eql({foo: {bar: false}, key: [1, 2, 3]});
+  });
+
+  it('test readArray', function () {
+    var ast = doc.parse([
+      '/**',
+      ' * @array [foo => bar, 1, 2, array]',
+      ' */'
+    ].join('\n'));
+    ast.body[0].kind.should.be.exactly('array');
+    ast.body[0].value.should.be.eql([
+      {
+        kind: 'key',
+        name: 'foo',
+        value: 'bar'
+      },
+      1,
+      2,
+      'array'
+    ]);
+  });
 });
