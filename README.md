@@ -72,6 +72,52 @@ var data = reader.parse('/** @hello world */');
 }
 ```
 
+# Declaring custom doc blocks
+
+By default, `doc-parser` supports `@return`,`@param`,`@throws` and `@deprecated`
+doc blocks.
+
+You can extend the support to any doc block :
+
+```js
+// lets handle @global (type) (var) (description)
+var DocParser = require('doc-parser');
+var reader = new DocParser({
+  'global': [
+    {
+      property: 'type',
+      parser: 'type',
+      optional: true
+    },
+    {
+      property: 'what',
+      parser: 'variable',
+      optional: true
+    },
+    {
+      property: 'description',
+      parser: 'text',
+      optional: true,
+      default: ''
+    }
+  ]
+});
+var data = reader.parse('/** @global string some description */');
+```
+
+This will result in a new kind of doc block with the specified properties. Here
+a list of supported parsers :
+
+- type : a simple type, class name, or array of types
+- variable : a variable name
+- text : a line of text (will eat every token until the current line ends)
+- version: a semantic version
+- array : an array of items
+- object : a json object definition
+- boolean : a boolean
+- number : a number (integer or float)
+- string : a simple or double quoted text
+
 # Misc
 
 This library is released under BSD-3 license clause.
