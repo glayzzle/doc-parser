@@ -8,7 +8,44 @@ var should = require('should');
 var DocBlockParser = require('../src/index');
 
 describe('Test parser', function () {
-  var doc = new DocBlockParser();
+  var doc = new DocBlockParser({
+    boolean: [
+      {
+        property: 'value',
+        parser: 'boolean'
+      }
+    ],
+    array: [
+      {
+        property: 'value',
+        parser: 'array'
+      }
+    ],
+    number: [
+      {
+        property: 'value',
+        parser: 'number'
+      }
+    ],
+    string: [
+      {
+        property: 'value',
+        parser: 'string'
+      }
+    ],
+    text: [
+      {
+        property: 'value',
+        parser: 'text'
+      }
+    ],
+    object: [
+      {
+        property: 'value',
+        parser: 'object'
+      }
+    ]
+  });
 
   it('extend grammar', function () {
     var doc2 = new DocBlockParser({
@@ -34,9 +71,9 @@ describe('Test parser', function () {
     ast.body[0].type.should.be.exactly('test');
     ast.body[0].options.length.should.be.exactly(3);
     ast.body[0].options[0].kind.should.be.exactly('number');
-    ast.body[0].options[0].value.should.be.exactly('123');
+    ast.body[0].options[0].value.should.be.exactly(123);
     ast.body[0].options[1].kind.should.be.exactly('number');
-    ast.body[0].options[1].value.should.be.exactly('1.23');
+    ast.body[0].options[1].value.should.be.exactly(1.23);
     ast.body[0].options[2].kind.should.be.exactly('null');
   });
 
@@ -49,7 +86,7 @@ describe('Test parser', function () {
     ast.body[0].type.should.be.exactly('test');
     ast.body[0].options.length.should.be.exactly(1);
     ast.body[0].options[0].kind.should.be.exactly('array');
-    console.log(ast.body[0].options[0]);
+    // @todo console.log(ast.body[0].options[0]);
   });
 
   it('test boolean', function () {
@@ -133,5 +170,95 @@ describe('Test parser', function () {
     ast.body[0].version.minor.should.be.exactly(223);
     ast.body[0].version.patch.should.be.exactly(314);
     ast.body[0].version.label.should.be.exactly('beta.5');
+  });
+
+  it('test deprecated options', function () {
+    var ast = doc.parse([
+      '/**',
+      ' * @deprecated Foo',
+      ' */'
+    ].join('\n'));
+    ast.body[0].kind.should.be.exactly('deprecated');
+    ast.body[0].description.should.be.exactly('Foo');
+  });
+
+  it('test boolean', function () {
+    var ast = doc.parse([
+      '/**',
+      ' * @boolean true',
+      ' * @boolean false',
+      ' * @boolean',
+      ' */'
+    ].join('\n'));
+    ast.body[0].kind.should.be.exactly('boolean');
+    ast.body[0].value.should.be.exactly(true);
+    ast.body[1].kind.should.be.exactly('boolean');
+    ast.body[1].value.should.be.exactly(false);
+    ast.body[2].kind.should.be.exactly('boolean');
+    should.equal(ast.body[2].value, null);
+  });
+
+  it('test number', function () {
+    var ast = doc.parse([
+      '/**',
+      ' * @number 123',
+      ' * @number 1.23',
+      ' * @number',
+      ' */'
+    ].join('\n'));
+    ast.body[0].kind.should.be.exactly('number');
+    ast.body[0].value.should.be.exactly(123);
+    ast.body[1].kind.should.be.exactly('number');
+    ast.body[1].value.should.be.exactly(1.23);
+    ast.body[2].kind.should.be.exactly('number');
+    should.equal(ast.body[2].value, null);
+  });
+
+  it('test string', function () {
+    var ast = doc.parse([
+      '/**',
+      ' * @string "azerty"',
+      ' * @string \'azerty\'',
+      ' * @string',
+      ' */'
+    ].join('\n'));
+    ast.body[0].kind.should.be.exactly('string');
+    ast.body[0].value.should.be.exactly('azerty');
+    ast.body[1].kind.should.be.exactly('string');
+    ast.body[1].value.should.be.exactly('azerty');
+    ast.body[2].kind.should.be.exactly('string');
+    should.equal(ast.body[2].value, null);
+  });
+
+  it('test array', function () {
+    var ast = doc.parse([
+      '/**',
+      ' * @array [1, 2, 3]',
+      ' * @array array(4, 5, 6)',
+      ' * @array',
+      ' */'
+    ].join('\n'));
+    ast.body[0].kind.should.be.exactly('array');
+    ast.body[0].value.should.be.eql([1, 2, 3]);
+    ast.body[1].kind.should.be.exactly('array');
+    ast.body[1].value.should.be.eql([4, 5, 6]);
+    ast.body[2].kind.should.be.exactly('array');
+    should.equal(ast.body[2].value, null);
+  });
+
+  it('test object', function () {
+    var ast = doc.parse([
+      '/**',
+      ' * @object { foo: 1 }',
+      ' * @object { "bar": false }',
+      ' * @object',
+      ' */'
+    ].join('\n'));
+    ast.body[0].kind.should.be.exactly('object');
+    ast.body[0].value.should.be.eql({foo: 1});
+    ast.body[1].kind.should.be.exactly('object');
+    ast.body[1].value.should.be.eql({bar: false});
+    ast.body[2].kind.should.be.exactly('object');
+    should.equal(ast.body[2].value, null);
   });
 });

@@ -504,8 +504,14 @@ Parser.prototype.parseArray = function () {
   return null;
 };
 
+/**
+ * Parse an object
+ */
 Parser.prototype.parseObject = function () {
-
+  if (this.token === '{') {
+    return this.readJson();
+  }
+  return null;
 };
 
 /**
@@ -619,8 +625,8 @@ Parser.prototype.parseStatement = function () {
 
 Parser.prototype.readArray = function (endChar) {
   var result = [];
+  this.token = this.lexer.lex(); // consume start char
   do {
-    this.token = this.lexer.lex(); // consume start char
     var item = this.parseTopStatement();
     if (item !== null) { // ignore
       item = this.getJsonValue(item);
@@ -638,6 +644,7 @@ Parser.prototype.readArray = function (endChar) {
       if (this.token !== ',') {
         break;
       }
+      this.token = this.lexer.lex();
     }
   } while (this.token !== endChar && this.token !== this.lexer._t.T_EOF);
   if (this.token === endChar) {
@@ -648,11 +655,13 @@ Parser.prototype.readArray = function (endChar) {
 
 Parser.prototype.readJson = function () {
   var result = {};
+  this.token = this.lexer.lex();
   do {
-    this.token = this.lexer.lex();
     var item = this.parseTopStatement();
     if (item !== null) { // ignore
-      if (this.token === '=>') {
+      if (item.kind === 'key') {
+        result[item.name] = item.value;
+      } else if (this.token === '=>') {
         item = this.getJsonKey(item);
         if (item !== null) {
           this.token = this.lexer.lex();
@@ -664,6 +673,7 @@ Parser.prototype.readJson = function () {
       if (this.token !== ',') {
         break;
       }
+      this.token = this.lexer.lex();
     }
   } while (this.token !== '}' && this.token !== this.lexer._t.T_EOF);
   if (this.token === '}') {
