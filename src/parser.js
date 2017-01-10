@@ -223,6 +223,7 @@ Parser.prototype.parseTopStatement = function () {
     return this.parseAnnotation();
   }
   // ignore it
+  this.token = this.lexer.lex();
   return null;
 };
 
@@ -251,23 +252,17 @@ Parser.prototype.parseAnnotation = function () {
 
     if (this.token === '(') {
       // method annotation
-      do {
-        result = {
-          kind: 'annotation',
-          type: type,
-          arguments: []
-        };
-        this.token = this.lexer.lex();
-        item = this.parseTopStatement();
-        if (item !== null) {
-          result.arguments.push(item);
-        }
-      } while (this.token !== ')' && this.token !== this.lexer._t.T_EOF);
+      this.token = this.lexer.lex();
+      result = {
+        kind: 'annotation',
+        name: type,
+        arguments: this.parseMethodArguments()
+      };
     } else {
       // generic doc block
       result = {
         kind: 'block',
-        type: type,
+        name: type,
         options: []
       };
       while (line === this.lexer.line) {
@@ -280,6 +275,36 @@ Parser.prototype.parseAnnotation = function () {
     return result;
   }
   return null;
+};
+
+/**
+ * Parse a list of arguments
+ */
+Parser.prototype.parseMethodArguments = function () {
+  var result = [];
+  var item;
+  do {
+    item = this.parseTopStatement();
+    if (item !== null) {
+      if (this.token === '=' || this.token === '=>') {
+        // key value
+        this.token = this.lexer.lex();
+        item = {
+          kind: 'key',
+          name: this.getJsonValue(item),
+          value: this.parseTopStatement()
+        };
+      }
+      result.push(item);
+    }
+    if (this.token === ',') {
+      this.token = this.lexer.lex(); // read next argument
+    }
+  } while (this.token !== ')' && this.token !== this.lexer._t.T_EOF);
+  if (this.token === ')') {
+    this.token = this.lexer.lex();
+  }
+  return result;
 };
 
 /**
@@ -601,19 +626,12 @@ Parser.prototype.parseStatement = function () {
     };
   } else if (this.token === '(') {
     // method
-    var result = {
+    this.token = this.lexer.lex();
+    return {
       kind: 'method',
       name: name,
-      arguments: []
+      arguments: this.parseMethodArguments()
     };
-    do {
-      this.token = this.lexer.lex();
-      var item = this.parseTopStatement();
-      if (item !== null) {
-        result.arguments.push(item);
-      }
-    } while (this.token !== ')' && this.token !== this.lexer._t.T_EOF);
-    return result;
   }
   return {
     kind: 'word',

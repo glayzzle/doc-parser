@@ -68,7 +68,7 @@ describe('Test parser', function () {
       ' * @test 123 1.23 null',
       ' */'
     ].join('\r\n'));
-    ast.body[0].type.should.be.exactly('test');
+    ast.body[0].name.should.be.exactly('test');
     ast.body[0].options.length.should.be.exactly(3);
     ast.body[0].options[0].kind.should.be.exactly('number');
     ast.body[0].options[0].value.should.be.exactly(123);
@@ -83,7 +83,7 @@ describe('Test parser', function () {
       ' * @test [1, 2, a => b]',
       ' */'
     ].join('\r\n'));
-    ast.body[0].type.should.be.exactly('test');
+    ast.body[0].name.should.be.exactly('test');
     ast.body[0].options.length.should.be.exactly(1);
     ast.body[0].options[0].kind.should.be.exactly('array');
     // @todo console.log(ast.body[0].options[0]);
@@ -95,7 +95,7 @@ describe('Test parser', function () {
       ' * @test true false',
       ' */'
     ].join('\r\n'));
-    ast.body[0].type.should.be.exactly('test');
+    ast.body[0].name.should.be.exactly('test');
     ast.body[0].options.length.should.be.exactly(2);
     ast.body[0].options[0].kind.should.be.exactly('boolean');
     ast.body[0].options[0].value.should.be.exactly(true);
