@@ -1,3 +1,11 @@
+## [Version 0.4.0](https://github.com/glayzzle/docblock-parser/releases/tag/v0.4.0) (2017-1-10)
+
+### Major Changes
+
+- implement annotations & improve tests: [`af164d6`](https://github.com/glayzzle/docblock-parser/commit/af164d6)
+
+[...full changes](https://github.com/glayzzle/docblock-parser/compare/v0.3.0...v0.4.0)
+
 ## [Version 0.3.0](https://github.com/glayzzle/docblock-parser/releases/tag/v0.3.0) (2017-1-9)
 
 ### Major Changes
