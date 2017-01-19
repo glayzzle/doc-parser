@@ -26,6 +26,33 @@ describe('Test annotations', function () {
     ast.body[0].name.should.be.exactly('foobar');
     ast.body[0].options.length.should.be.exactly(0);
   });
+  it('should every block', function () {
+    var ast = doc.parse([
+      '/**',
+      ' * @constructor',
+      ' * @param SimpleElement $element',
+      ' * @param BlockFactory $blockFactory',
+      ' * @param Mapper $mapper',
+      ' * @param BrowserInterface $browser',
+      ' * @param SequenceSorterInterface $sequenceSorter',
+      ' * @param ObjectManager $objectManager',
+      ' * @param array $config [optional]',
+      ' */'
+    ].join('\r'));
+    JSON.stringify(ast.body).should.be.exactly(
+      '[' +
+      '{"kind":"block","name":"constructor","options":[]},' +
+      '{"kind":"param","type":{"kind":"type","fqn":false,"name":"SimpleElement"},"name":"element","description":""},' +
+      '{"kind":"param","type":{"kind":"type","fqn":false,"name":"BlockFactory"},"name":"blockFactory","description":""},' +
+      '{"kind":"param","type":{"kind":"type","fqn":false,"name":"Mapper"},"name":"mapper","description":""},' +
+      '{"kind":"param","type":{"kind":"type","fqn":false,"name":"BrowserInterface"},"name":"browser","description":""},' +
+      '{"kind":"param","type":{"kind":"type","fqn":false,"name":"SequenceSorterInterface"},"name":"sequenceSorter","description":""},' +
+      '{"kind":"param","type":{"kind":"type","fqn":false,"name":"ObjectManager"},"name":"objectManager","description":""},' +
+      '{"kind":"param","type":{"kind":"type","fqn":false,"name":"array"},"name":"config","description":""},{"kind":"array","value":["optional"]}' +
+      ']'
+    );
+  });
+
   it('should parse', function () {
     var ast = doc.parse([
       '/**',

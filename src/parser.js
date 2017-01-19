@@ -241,7 +241,7 @@ Parser.prototype.parseAnnotation = function () {
     this.token = this.lexer.lex(); // eat the tag name
 
     // grammar specific annotation
-    if (this.grammar[type]) {
+    if (Array.isArray(this.grammar[type])) {
       var backup = this.lexer.state();
       result = this.parseGrammar(type);
       if (result !== null) {
