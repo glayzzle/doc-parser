@@ -20,6 +20,14 @@ describe('Test annotations', function () {
   });
   it('should parse', function () {
     var ast = doc.parse([
+      '@foobar .'
+    ]);
+    ast.body[0].kind.should.be.exactly('block');
+    ast.body[0].name.should.be.exactly('foobar');
+    ast.body[0].options.length.should.be.exactly(0);
+  });
+  it('should parse', function () {
+    var ast = doc.parse([
       '/**',
       ' * @foobar("arg", @bar("foo" => true))',
       ' * bark(as => dog)',
