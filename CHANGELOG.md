@@ -1,3 +1,11 @@
+## [Version 0.4.3](https://github.com/glayzzle/docblock-parser/releases/tag/v0.4.3) (2017-1-19)
+
+### Patches
+
+- avoid reserved keywords like constructor: [`f820f4d`](https://github.com/glayzzle/docblock-parser/commit/f820f4d)
+
+[...full changes](https://github.com/glayzzle/docblock-parser/compare/v0.4.2...v0.4.3)
+
 ## [Version 0.4.2](https://github.com/glayzzle/docblock-parser/releases/tag/v0.4.2) (2017-1-19)
 
 ### Patches
