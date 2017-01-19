@@ -1,3 +1,11 @@
+## [Version 0.4.4](https://github.com/glayzzle/docblock-parser/releases/tag/v0.4.4) (2017-1-20)
+
+### Patches
+
+- check offset size: [`db5f6a2`](https://github.com/glayzzle/docblock-parser/commit/db5f6a2)
+
+[...full changes](https://github.com/glayzzle/docblock-parser/compare/v0.4.3...v0.4.4)
+
 ## [Version 0.4.3](https://github.com/glayzzle/docblock-parser/releases/tag/v0.4.3) (2017-1-19)
 
 ### Patches
