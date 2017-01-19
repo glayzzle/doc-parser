@@ -1,3 +1,11 @@
+## [Version 0.4.1](https://github.com/glayzzle/docblock-parser/releases/tag/v0.4.1) (2017-1-19)
+
+### Patches
+
+- fix infinite loop when parsing a block: [`4a05f0b`](https://github.com/glayzzle/docblock-parser/commit/4a05f0b)
+
+[...full changes](https://github.com/glayzzle/docblock-parser/compare/v0.4.0...v0.4.1)
+
 ## [Version 0.4.0](https://github.com/glayzzle/docblock-parser/releases/tag/v0.4.0) (2017-1-10)
 
 ### Major Changes
