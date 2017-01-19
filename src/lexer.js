@@ -154,7 +154,7 @@ Lexer.prototype.next = function () {
     }
     if (ch === ':') {
       ch = '=>'; // alias
-    } else if (ch === '=' && this._input[this.offset] === '>') {
+    } else if (ch === '=' && this.offset < this._input.length && this._input[this.offset] === '>') {
       ch += this.input();
     }
     return ch;
