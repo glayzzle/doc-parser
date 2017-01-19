@@ -265,7 +265,7 @@ Parser.prototype.parseAnnotation = function () {
         name: type,
         options: []
       };
-      while (line === this.lexer.line) {
+      while (line === this.lexer.line && this.token !== this.lexer._t.T_EOF) {
         item = this.parseTopStatement();
         if (item !== null) {
           result.options.push(item);
