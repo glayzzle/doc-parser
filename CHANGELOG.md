@@ -1,3 +1,12 @@
+## [Version 0.4.2](https://github.com/glayzzle/docblock-parser/releases/tag/v0.4.2) (2017-1-19)
+
+### Patches
+
+- Update README.md: [`6e49587`](https://github.com/glayzzle/docblock-parser/commit/6e49587)
+- protect from reading an undefined char: [`9453437`](https://github.com/glayzzle/docblock-parser/commit/9453437)
+
+[...full changes](https://github.com/glayzzle/docblock-parser/compare/v0.4.1...v0.4.2)
+
 ## [Version 0.4.1](https://github.com/glayzzle/docblock-parser/releases/tag/v0.4.1) (2017-1-19)
 
 ### Patches
