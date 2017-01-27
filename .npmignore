@@ -1,0 +1,7 @@
+/docs/
+/test/
+/.coveralls.yml
+/.gitignore
+/.jsbeautifyrc
+/.travis.yml
+/gruntfile.js
