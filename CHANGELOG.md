@@ -1,3 +1,11 @@
+## [Version 0.4.6](https://github.com/glayzzle/docblock-parser/releases/tag/v0.4.6) (2017-1-27)
+
+### Patches
+
+- fix gitignore: [`eac9a61`](https://github.com/glayzzle/docblock-parser/commit/eac9a61)
+
+[...full changes](https://github.com/glayzzle/docblock-parser/compare/v0.4.5...v0.4.6)
+
 ## [Version 0.4.5](https://github.com/glayzzle/docblock-parser/releases/tag/v0.4.5) (2017-1-27)
 
 ### Minor Changes
