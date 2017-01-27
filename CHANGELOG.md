@@ -1,3 +1,11 @@
+## [Version 0.4.5](https://github.com/glayzzle/docblock-parser/releases/tag/v0.4.5) (2017-1-27)
+
+### Minor Changes
+
+- add files to ignore: [`aca948a`](https://github.com/glayzzle/docblock-parser/commit/aca948a)
+
+[...full changes](https://github.com/glayzzle/docblock-parser/compare/v0.4.4...v0.4.5)
+
 ## [Version 0.4.4](https://github.com/glayzzle/docblock-parser/releases/tag/v0.4.4) (2017-1-20)
 
 ### Patches
