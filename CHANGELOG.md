@@ -1,3 +1,11 @@
+## [Version 0.4.7](https://github.com/glayzzle/docblock-parser/releases/tag/v0.4.7) (2017-2-21)
+
+### Patches
+
+- start a typescript definition: [`1b4c39c`](https://github.com/glayzzle/docblock-parser/commit/1b4c39c)
+
+[...full changes](https://github.com/glayzzle/docblock-parser/compare/v0.4.6...v0.4.7)
+
 ## [Version 0.4.6](https://github.com/glayzzle/docblock-parser/releases/tag/v0.4.6) (2017-1-27)
 
 ### Patches
