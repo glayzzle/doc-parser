@@ -33,6 +33,10 @@ Returns **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refere
 
 Parses a @annotation
 
+### parseMethodArguments
+
+Parse a list of arguments
+
 ### parseGrammar
 
 Parsing a rule
@@ -79,6 +83,10 @@ parseVersion ::= T_NUM ('.' T_NUM ('.' T_NUM ('-' T_STRING)?)?)?
 ### parseArray
 
 Parses an array
+
+### parseObject
+
+Parse an object
 
 ### parseBoolean
 
