@@ -53,6 +53,30 @@ describe('Test annotations', function () {
     );
   });
 
+  it('test deprecated', function () {
+    var ast = doc.parse([
+      '/**',
+      ' * @deprecated 1.2.3-alpha',
+      ' * @deprecated That\'s the way',
+      ' */'
+    ].join('\r\n'));
+    ast.body.length.should.be.exactly(2);
+
+    ast.body[0].kind.should.be.exactly('deprecated');
+    (ast.body[0].description === null).should.be.exactly(true);
+    ast.body[0].version.major.should.be.exactly(1);
+    ast.body[0].version.minor.should.be.exactly(2);
+    ast.body[0].version.patch.should.be.exactly(3);
+    ast.body[0].version.label.should.be.exactly('alpha');
+
+    ast.body[1].kind.should.be.exactly('deprecated');
+    ast.body[1].description.should.be.exactly('That\'s the way');
+    ast.body[1].version.major.should.be.exactly(0);
+    ast.body[1].version.minor.should.be.exactly(0);
+    ast.body[1].version.patch.should.be.exactly(0);
+    (ast.body[1].version.label === null).should.be.exactly(true);
+  });
+
   it('should parse', function () {
     var ast = doc.parse([
       '/**',

@@ -447,18 +447,16 @@ Parser.prototype.parseText = function () {
   if (this.token !== this.lexer._t.T_STRING) {
     return null;
   }
-  var line = this.lexer.backup.line;
-  var offset = this.lexer.backup.offset;
-  while (this.token !== this.lexer._t.EOF) {
-    this.token = this.lexer.lex(); // eat && continue
-    if (this.lexer.line !== line) {
-      this.lexer.unlex();
+  var ch = this.lexer.input();
+  while (ch !== null) {
+    if (ch === '\r' || ch === '\n' || ch === '\r\n') {
       break;
     }
+    ch = this.lexer.input();
   }
-  var result = this.lexer._input.substring(offset, this.lexer.offset).trim();
+  var input = this.lexer.text.trim();
   this.token = this.lexer.lex(); // eat && continue
-  return result;
+  return input;
 };
 
 /**
