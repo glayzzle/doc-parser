@@ -1,3 +1,11 @@
+## [Version 0.4.8](https://github.com/glayzzle/docblock-parser/releases/tag/v0.4.8) (2017-3-12)
+
+### Patches
+
+- https://github.com/glayzzle/doc-parser/issues fix issue of text parsing by using the lexer input function dirrectly: [`ecd6a46`](https://github.com/glayzzle/docblock-parser/commit/ecd6a46)
+
+[...full changes](https://github.com/glayzzle/docblock-parser/compare/v0.4.7...v0.4.8)
+
 ## [Version 0.4.7](https://github.com/glayzzle/docblock-parser/releases/tag/v0.4.7) (2017-2-21)
 
 ### Patches
