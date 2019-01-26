@@ -283,6 +283,10 @@ Parser.prototype.parseAnnotation = function () {
 Parser.prototype.parseMethodArguments = function () {
   var result = [];
   var item;
+  if (this.token === ')') {
+    this.token = this.lexer.lex();
+    return result;
+  }
   do {
     item = this.parseTopStatement();
     if (item !== null) {
