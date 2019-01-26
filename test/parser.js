@@ -320,4 +320,16 @@ describe('Test parser', function () {
       }
     });
   });
+
+  it('test annotation method with no arguments', function () {
+    var ast = doc.parse([
+      '/**',
+      ' * @SomeMethod()',
+      ' * @SomeOtherAnnotation',
+      ' */'
+    ].join('\n'));
+    ast.body.length.should.be.exactly(2);
+    ast.body[0].kind.should.be.exactly('annotation');
+    ast.body[0].arguments.length.should.be.exactly(0);
+  });
 });
