@@ -9,7 +9,7 @@ module.exports = function (grunt) {
       options: {
         banner: '/*! <%= pkg.name %> - BSD3 License - <%= grunt.template.today("yyyy-mm-dd") %> */\n',
         alias: {
-          'docblock-parser': './src/index.js'
+          'doc-parser': './src/index.js'
         }
       },
       dist: {
