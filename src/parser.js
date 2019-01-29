@@ -644,6 +644,10 @@ Parser.prototype.parseStatement = function () {
 Parser.prototype.readArray = function (endChar) {
   var result = [];
   this.token = this.lexer.lex(); // consume start char
+  if (this.token === endChar) {
+    this.token = this.lexer.lex();
+    return result;
+  }
   do {
     var item = this.parseTopStatement();
     if (item !== null) { // ignore
