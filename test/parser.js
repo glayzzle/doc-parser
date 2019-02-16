@@ -332,4 +332,18 @@ describe('Test parser', function () {
     ast.body[0].kind.should.be.exactly('annotation');
     ast.body[0].arguments.length.should.be.exactly(0);
   });
+
+  it('test empty array annotation', function () {
+    var ast = doc.parse([
+      '/**',
+      ' * @SomeArray[]',
+      ' * @SomeOtherAnnotation',
+      ' */'
+    ].join('\n'));
+    ast.body.length.should.be.exactly(2);
+    ast.body[0].kind.should.be.exactly('block');
+    ast.body[0].options.length.should.be.exactly(1);
+    ast.body[0].options[0].kind.should.be.exactly('array');
+    ast.body[0].options[0].value.length.should.be.exactly(0);
+  });
 });
