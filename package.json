@@ -41,7 +41,7 @@
     "coveralls": "^2.11.15",
     "grunt": "^1.0.1",
     "grunt-browserify": "^5.0.0",
-    "grunt-contrib-uglify": "^2.0.0",
+    "grunt-contrib-uglify": "^4.0.0",
     "grunt-documentation": "^1.2.1",
     "istanbul": "^0.4.5",
     "mocha": "^3.2.0",
