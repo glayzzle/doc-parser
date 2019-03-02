@@ -38,7 +38,7 @@
   },
   "homepage": "https://github.com/glayzzle/doc-parser#readme",
   "devDependencies": {
-    "coveralls": "^2.11.15",
+    "coveralls": "^3.0.3",
     "grunt": "^1.0.1",
     "grunt-browserify": "^5.0.0",
     "grunt-contrib-uglify": "^4.0.0",
