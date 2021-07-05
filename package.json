@@ -44,7 +44,7 @@
     "grunt-contrib-uglify": "^4.0.0",
     "grunt-documentation": "^1.2.1",
     "istanbul": "^0.4.5",
-    "mocha": "^7.1.1",
+    "mocha": "^9.0.2",
     "xo": "^0.30.0",
     "should": "^13.2.3"
   }
